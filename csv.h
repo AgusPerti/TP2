@@ -20,6 +20,10 @@ csv (indicado por la ruta pasada por parámetro) no exista.
 abb_t* csv_crear_estructura(const char* ruta_csv);
 
 // Documentacion...
-hash_t* csv_crear_especialidades(const char* ruta_csv);
+hash_t* csv_crear_especialidades_regulares(const char* ruta_csv); 
+
+
+hash_t* csv_crear_especialidades_urgentes(const char* ruta_csv);
+
 
 #endif
