@@ -1,0 +1,2 @@
+1°) Los doctores podriamos agregarlos a un hash, clave: doctor, valor: especialidad. Asi sabriamos si el doctor esta disponible o no. (TDA HASH), quizas convendría un ABB que me ordenaria los doctores, asi luego al momento de imprimirlos todos en orden alfabetico seria mas sencillo.
+2°) Para los pacientes usariamos una cola de prioridad, asi quedarian ordenados a partir del año de inscripcion. (TDA HEAP).
