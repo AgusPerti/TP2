@@ -18,8 +18,8 @@
 #define PRIORIDAD2 "REGULAR"
 #define ANIO_ACTUAL 2020
 
-bool verificar_turno(char** parametros, abb_t* pacientes, hash_t* especialidades_regulares) {
-	if (!abb_pertenece(pacientes, parametros[0])) {
+bool verificar_turno(char** parametros, hash_t* pacientes, hash_t* especialidades_regulares) {
+	if (!hash_pertenece(pacientes, parametros[0])) {
 		printf(ENOENT_PACIENTE, parametros[0]);
 		return false;
 	}
@@ -38,14 +38,14 @@ bool verificar_turno(char** parametros, abb_t* pacientes, hash_t* especialidades
 	return true;
 }
 
-void pedir_turno(char** parametros, abb_t* pacientes, hash_t* especialidades_regulares, hash_t* especialidades_urgentes) {
+void pedir_turno(char** parametros, hash_t* pacientes, hash_t* especialidades_regulares, hash_t* especialidades_urgentes) {
 	size_t cantidad_pacientes = 0;
 	if (strcmp(parametros[2], PRIORIDAD1) == 0) {
 		cola_encolar(hash_obtener(especialidades_urgentes, parametros[1]), parametros[0]);
 	} else {
 		lista_t* datos_paciente = lista_crear();
 		if (!datos_paciente) return;
-		lista_insertar_primero(datos_paciente, abb_obtener(pacientes, parametros[0]));
+		lista_insertar_primero(datos_paciente, hash_obtener(pacientes, parametros[0]));
 		lista_insertar_primero(datos_paciente, parametros[0]);
 		heap_encolar(hash_obtener(especialidades_regulares, parametros[1]), datos_paciente);
 	}
@@ -54,7 +54,7 @@ void pedir_turno(char** parametros, abb_t* pacientes, hash_t* especialidades_reg
 	printf(CANT_PACIENTES_ENCOLADOS, cantidad_pacientes, parametros[1]);
 }
 
-void procesar_comando(const char* comando, char** parametros, abb_t* doctores, abb_t* pacientes, hash_t* especialidades_regulares, hash_t* especialidades_urgentes) {
+void procesar_comando(const char* comando, char** parametros, abb_t* doctores, hash_t* pacientes, hash_t* especialidades_regulares, hash_t* especialidades_urgentes) {
 	if (strcmp(comando, COMANDO_PEDIR_TURNO) == 0) {
 		if (!verificar_turno(parametros, pacientes, especialidades_regulares)) return;
 		pedir_turno(parametros, pacientes, especialidades_regulares, especialidades_urgentes);
@@ -74,7 +74,7 @@ void eliminar_fin_linea(char* linea) {
 	}
 }
 
-void procesar_entrada(abb_t* doctores, abb_t* pacientes, hash_t* especialidades_regulares, hash_t* especialidades_urgentes) {
+void procesar_entrada(abb_t* doctores, hash_t* pacientes, hash_t* especialidades_regulares, hash_t* especialidades_urgentes) {
 	char* linea = NULL;
 	size_t c = 0;
 	while (getline(&linea, &c, stdin) > 0) {
@@ -94,10 +94,19 @@ void procesar_entrada(abb_t* doctores, abb_t* pacientes, hash_t* especialidades_
 }
 
 int main(int argc, char** argv) {
-	abb_t* doctores = csv_crear_estructura(argv[1]);
-	abb_t* pacientes = csv_crear_estructura(argv[2]);
-	hash_t* especialidades_regulares = csv_crear_especialidades_regulares(argv[1]);
-	hash_t* especialidades_urgentes = csv_crear_especialidades_urgentes(argv[1]);
-	procesar_entrada(doctores, pacientes, especialidades_regulares, especialidades_urgentes);
+	hash_t* pacientes = hash_crear(NULL);
+	hash_t* regulares = hash_crear(NULL);
+	hash_t* urgentes = hash_crear(NULL);
+	abb_t* doctores = abb_crear(strcmp, NULL);
+	
+	csv_leer_archivo(argv[1], 0, pacientes, regulares, urgentes, doctores);
+	csv_leer_archivo(argv[2], 1, pacientes, regulares, urgentes, doctores);
+
+	/*if (abb_cantidad(doctores) == 0) {
+		puts("WIPIIIIIIII");
+	}*/
+
+	procesar_entrada(doctores, pacientes, regulares, urgentes);
+
 	return 0;
 }
