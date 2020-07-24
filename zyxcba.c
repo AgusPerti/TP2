@@ -138,25 +138,53 @@ void procesar_entrada(abb_t* doctores, hash_t* pacientes, hash_t* especialidades
 	free(linea);
 }
 
+bool visitar(const char* clave, void* dato, void* extra) {
+	lista_destruir(dato, free);
+	return true;
+}
+
+void destruir_estructuras(hash_t* pacientes, hash_t* regulares, hash_t* urgentes, abb_t* doctores) {
+	hash_destruir(pacientes);
+
+	hash_iter_t* iter_regulares = hash_iter_crear(regulares);
+	hash_iter_t* iter_urgentes = hash_iter_crear(urgentes);
+
+	for (size_t i = 0; i < hash_cantidad(regulares); i++) {
+		heap_t* heap = hash_obtener(regulares, hash_iter_ver_actual(iter_regulares));
+		while (!heap_esta_vacio(heap)) {
+			lista_destruir(heap_desencolar(heap), NULL);
+		}
+		heap_destruir(heap, free);
+		hash_iter_avanzar(iter_regulares);
+	}
+
+	for (size_t i = 0; i < hash_cantidad(urgentes); i++) {
+		cola_destruir(hash_obtener(urgentes, hash_iter_ver_actual(iter_urgentes)), NULL);
+		hash_iter_avanzar(iter_urgentes);
+	}
+
+	abb_in_order(doctores, visitar, NULL);
+
+	hash_iter_destruir(iter_regulares);
+	hash_iter_destruir(iter_urgentes);
+
+	hash_destruir(regulares);
+	hash_destruir(urgentes);
+	abb_destruir(doctores);
+}
+
 int main(int argc, char** argv) {
 	hash_t* pacientes = hash_crear(free);
 	hash_t* regulares = hash_crear(NULL);
 	hash_t* urgentes = hash_crear(NULL);
-	abb_t* doctores = abb_crear(strcmp, free);
+	abb_t* doctores = abb_crear(strcmp, NULL);
 	
 	csv_leer_archivo(argv[1], 0, pacientes, regulares, urgentes, doctores);
 	csv_leer_archivo(argv[2], 1, pacientes, regulares, urgentes, doctores);
 
-	/*if (abb_cantidad(doctores) == 0) {
-		puts("WIPIIIIIIII");
-	}*/
-
 	procesar_entrada(doctores, pacientes, regulares, urgentes);
 
-	hash_destruir(pacientes);
-	hash_destruir(regulares);
-	hash_destruir(urgentes);
-	abb_destruir(doctores);
+	destruir_estructuras(pacientes, regulares, urgentes, doctores);
 
 	return 0;
 }
