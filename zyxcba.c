@@ -42,7 +42,7 @@ bool verificar_turno(char** parametros, hash_t* pacientes, hash_t* especialidade
 		printf(ENOENT_DOCTOR, parametros[0]);
 		return false;
 	}
-	lista_t* doc_esp = abb_obtener(doctores, parametros[0]);//ojo acà.
+	lista_t* doc_esp = abb_obtener(doctores, parametros[0]);//ojo acà, no se si se recibe una lista, trato de acceder con doc_esp[0] al nombre de la especialidad.
 	
 	size_t cantidad_pacientes = heap_cantidad(hash_obtener(especialidades_regulares, doc_esp[0])) + cola_cantidad(hash_obtener(especialidades_urgentes, doc_esp[0]));
 	
@@ -54,11 +54,11 @@ bool verificar_turno(char** parametros, hash_t* pacientes, hash_t* especialidade
 	return true;
 }*/
 /*void atender(char** parametros, abb_t* doctores, hash_t* especialidades_regulares, hash_t* especialidades_urgentes){
-	/*Parametros recibe solo el nombre del doctor, hay que fijarse si hay pacientes urgentes, si los hay, se atienden,
+	  Parametros recibe solo el nombre del doctor, hay que fijarse si hay pacientes urgentes, si los hay, se atienden,
 	  de otra manera se tratan a los pacientes regulares ingresando a la cola a traves de la especialidad del doctor.
 	  En cada caso afirmativo se imprime el nombre del paciente que fue atendido se actualiza y tambien el numero
 	  de pacientes restantes.
-	 */
+	 
 	
 }*/
 void pedir_turno(char** parametros, hash_t* pacientes, hash_t* especialidades_regulares, hash_t* especialidades_urgentes) {
