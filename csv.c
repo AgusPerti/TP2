@@ -7,18 +7,19 @@
 #include "lista.h"
 #include "cola.h"
 #define SEPARADOR ','
-
-/*typedef enum {
-	ARCHIVO_DOC,
-	ARCHIVO_PAC,
-} tipo_archivo_t;*/
+#define POS_CAMPO_PACIENTE 0
+#define POS_CAMPO_DOCTOR 0 
+#define POS_CAMPO_ANIO 1
+#define POS_CAMPO_ESPECIALIDAD 1
 
 int comparacion(const void* elem1, const void* elem2) {
-    if (*(int*)lista_ver_ultimo(elem1) < *(int*)lista_ver_ultimo(elem2)) {
+	int num1 = atoi((char*)lista_ver_ultimo(elem1));
+	int num2 = atoi((char*)lista_ver_ultimo(elem2));
+    if (num1 < num2) {
         return -1;
     }
 
-    if (*(int*)lista_ver_ultimo(elem1) > *(int*)lista_ver_ultimo(elem2)) {
+    if (num1 > num2) {
         return 1;
     }
 	
@@ -42,8 +43,9 @@ bool csv_leer_archivo(const char* ruta_csv, tipo_archivo_t tipo_archivo, hash_t*
 	while (getline(&linea, &c, archivo) > 0) {
 		eliminar_fin_linea(linea);
 		char** campos = split(linea, SEPARADOR);
+
 		if (tipo_archivo == ARCHIVO_DOC) {
-			if (!csv_crear_estructura_doctores(campos, doctores, regulares, urgentes)) {
+			if (!csv_crear_estructuras(campos, doctores, regulares, urgentes)) {
 				fclose(archivo);
 				hash_destruir(pacientes);
 				hash_destruir(regulares);
@@ -51,10 +53,7 @@ bool csv_leer_archivo(const char* ruta_csv, tipo_archivo_t tipo_archivo, hash_t*
 				abb_destruir(doctores);
 			}
 		} else {
-			/*if (!csv_crear_estructuras_hash(campos, pacientes, regulares, urgentes)) {
-				fclose(archivo);
-			}*/
-			hash_guardar(pacientes, campos[0], campos[1]);
+			hash_guardar(pacientes, campos[POS_CAMPO_PACIENTE], strdup(campos[POS_CAMPO_ANIO]));
 		}
 		free_strv(campos);
 	}
@@ -63,24 +62,24 @@ bool csv_leer_archivo(const char* ruta_csv, tipo_archivo_t tipo_archivo, hash_t*
 	return true;
 }
 
-bool csv_crear_estructura_doctores(char** campos, abb_t* arbol, hash_t* regulares, hash_t* urgentes) {
+bool csv_crear_estructuras(char** campos, abb_t* arbol, hash_t* regulares, hash_t* urgentes) {
 	lista_t* lista = lista_crear();
 	if (!lista) return false;
 
-	lista_insertar_primero(lista, campos[1]);
+	lista_insertar_primero(lista, strdup(campos[POS_CAMPO_ESPECIALIDAD]));
 	//lista_insertar_ultimo();
-	abb_guardar(arbol, campos[0], lista); 
+	abb_guardar(arbol, campos[POS_CAMPO_DOCTOR], lista); 
 
 	heap_t* heap = heap_crear(comparacion);
 	if (!heap) return false;
-	hash_guardar(regulares, campos[1], heap); 
+	hash_guardar(regulares, campos[POS_CAMPO_ESPECIALIDAD], heap); 
 	
 	cola_t* cola = cola_crear();
 	if (!cola) {
 		heap_destruir(heap, NULL);
 		return false;
 	}
-	hash_guardar(urgentes, campos[1], cola);
+	hash_guardar(urgentes, campos[POS_CAMPO_ESPECIALIDAD], cola);
 
 	return true;
 }

@@ -1,7 +1,9 @@
 #include "heap.h"
 #include <stdio.h>
 #include <stdlib.h>
-#define TAM 10
+#define CAPACIDAD_INICIAL 10
+#define AGRANDAMIENTO 2
+#define ACHICAR 2
 
 struct heap {
     void** datos;
@@ -31,33 +33,33 @@ void upheap(heap_t *heap, size_t pos) {
     return;
 }
 
-size_t calculo_maximo(heap_t* heap, size_t* pos, size_t* izq, size_t* der) {
+size_t calculo_maximo(void** datos, size_t cant, size_t* pos, size_t* izq, size_t* der, cmp_func_t cmp) {
     size_t max = *pos;
-    if (*izq < heap->cant && *der < heap->cant) {
-        if (heap->comparar(heap->datos[*izq], heap->datos[*der]) > 0) {
+    if (*izq < cant && *der < cant) {
+        if (cmp(datos[*izq], datos[*der]) > 0) {
             max = *izq;
         } else {
             max = *der;
         }
-        if (heap->comparar(heap->datos[max], heap->datos[*pos]) < 0) {
+        if (cmp(datos[max], datos[*pos]) < 0) {
             max = *pos;
         }
-    } else if (*izq < heap->cant && heap->comparar(heap->datos[*izq], heap->datos[*pos]) > 0) {
+    } else if (*izq < cant && cmp(datos[*izq], datos[*pos]) > 0) {
         max = *izq;
     }
     return max;
 }
 
-void downheap(heap_t *heap, size_t pos) {
-    if (pos >= heap->cant) return;
+void downheap(void** datos, size_t cant, size_t pos, cmp_func_t cmp) {
+    if (pos >= cant) return;
     
     size_t pos_hijo_izq = (2 * pos) + 1;
     size_t pos_hijo_der =  (2 * pos) + 2;
     size_t max = pos; 
-    max = calculo_maximo(heap, &pos, &pos_hijo_izq, &pos_hijo_der);
+    max = calculo_maximo(datos, cant, &pos, &pos_hijo_izq, &pos_hijo_der, cmp);
     if (max != pos) {
-        swap(&(heap->datos[max]), &(heap->datos[pos]));
-        downheap(heap, max);
+        swap(&(datos[max]), &(datos[pos]));
+        downheap(datos, cant, max, cmp);
     }
     return;
 }
@@ -75,25 +77,38 @@ heap_t *heap_crear(cmp_func_t cmp) {
     heap_t* heap = malloc(sizeof(heap_t));
     if (!(heap)) return NULL;
     
-    heap->datos = malloc(TAM * sizeof(void*));
+    heap->datos = malloc(CAPACIDAD_INICIAL * sizeof(void*));
     if (heap->datos == NULL) {
         free(heap);
         return NULL;
     }
-    heap->tam = TAM;
+    heap->tam = CAPACIDAD_INICIAL;
     heap->cant = 0;
     heap->comparar = cmp;
     return heap;
 }
 
 heap_t *heap_crear_arr(void *arreglo[], size_t n, cmp_func_t cmp) {
-    heap_t* heap = heap_crear(cmp);
-    for (size_t i = 0; i < n; i++) {
-        if (!(heap_encolar(heap, arreglo[i]))){
-            heap_destruir(heap, NULL);
-            return NULL;
-            }
+    if (arreglo == NULL) {
+        heap_t* heap = heap_crear(cmp);
+        return heap;
+    } 
+    heap_t* heap = malloc(sizeof(heap_t));
+    if (!heap) return NULL;
+    heap->datos = malloc(n * sizeof(void*));
+    
+    for (size_t j = 0; j < n; j++) {
+        heap->datos[j] = arreglo[j];
     }
+
+    heap->tam = n;
+    heap->cant = n;
+    heap->comparar = cmp;
+
+    for (int i = (int)n - 1; i >= 0; i--) {
+        downheap(heap->datos, heap->cant, i, heap->comparar);
+    }
+
     return heap;
 }
 
@@ -108,8 +123,8 @@ bool heap_esta_vacio(const heap_t *heap) {
 bool heap_encolar(heap_t *heap, void *elem) {
     if (elem == NULL) return NULL;
     
-    if (heap->cant == heap->tam - 1) {
-        size_t capacidad_nueva = heap->tam * 2;
+    if (heap->cant >= heap->tam - 1) {
+        size_t capacidad_nueva = heap->tam * AGRANDAMIENTO;
         if (!heap_redimensionar(heap, capacidad_nueva)) return false;
     }
     heap->datos[heap->cant] = elem;
@@ -121,15 +136,15 @@ bool heap_encolar(heap_t *heap, void *elem) {
 void *heap_desencolar(heap_t *heap) {
     if (heap_esta_vacio(heap)) return NULL;
     
-    if (heap->cant * 4 <= heap->tam && heap->tam > TAM) {
-        size_t capacidad_nueva = heap->tam / 2;
-        if (!heap_redimensionar(heap, capacidad_nueva)) return NULL;
+    if (heap->cant * 4 <= heap->tam && heap->tam > CAPACIDAD_INICIAL) {
+        size_t capacidad_nueva = heap->tam / ACHICAR;
+        heap_redimensionar(heap, capacidad_nueva);
     }
     void* valor = heap->datos[0];
     swap(&(heap->datos[0]), &(heap->datos[heap->cant - 1]));
     
     heap->cant--;
-    downheap(heap, 0);
+    downheap(heap->datos, heap->cant, 0, heap->comparar);
     return valor;
 }
 
@@ -144,11 +159,14 @@ void heap_destruir(heap_t *heap, void (*destruir_elemento)(void *e)) {
     free(heap->datos);
     free(heap);
 }
-void heap_sort(void *elementos[], size_t cant, cmp_func_t cmp){
-    heap_t* heap_aux = heap_crear_arr(elementos,cant,cmp);
 
-    for(size_t i = cant-1; i>=0 && !(heap_esta_vacio(heap_aux));i--){
-        elementos[i] = heap_desencolar(heap_aux);
+void heap_sort(void *elementos[], size_t cant, cmp_func_t cmp){
+    for(int i = (int)(cant / 2) - 1; i >= 0; i--){
+    	downheap(elementos, cant, i, cmp);
     }
-    heap_destruir(heap_aux, NULL);
+
+    for(int i = (int)cant - 1; i > 0 ; i--){
+        swap(&(elementos[i]), &(elementos[0]));
+        downheap(elementos, i, 0, cmp);
+    }
 }
