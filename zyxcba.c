@@ -37,7 +37,30 @@ bool verificar_turno(char** parametros, hash_t* pacientes, hash_t* especialidade
 
 	return true;
 }
-
+/*bool verificar_atender(char** parametros, abb_t* doctores, hash_t* especialidades_regulares){
+	if(!abb_pertenece(doctores, parametros[0])){
+		printf(ENOENT_DOCTOR, parametros[0]);
+		return false;
+	}
+	lista_t* doc_esp = abb_obtener(doctores, parametros[0]);//ojo acà.
+	
+	size_t cantidad_pacientes = heap_cantidad(hash_obtener(especialidades_regulares, doc_esp[0])) + cola_cantidad(hash_obtener(especialidades_urgentes, doc_esp[0]));
+	
+	
+	if(cantidad_pacientes == 0){
+		printf(SIN_PACIENTES);
+		return false;
+	}
+	return true;
+}*/
+/*void atender(char** parametros, abb_t* doctores, hash_t* especialidades_regulares, hash_t* especialidades_urgentes){
+	/*Parametros recibe solo el nombre del doctor, hay que fijarse si hay pacientes urgentes, si los hay, se atienden,
+	  de otra manera se tratan a los pacientes regulares ingresando a la cola a traves de la especialidad del doctor.
+	  En cada caso afirmativo se imprime el nombre del paciente que fue atendido se actualiza y tambien el numero
+	  de pacientes restantes.
+	 */
+	
+}*/
 void pedir_turno(char** parametros, hash_t* pacientes, hash_t* especialidades_regulares, hash_t* especialidades_urgentes) {
 	size_t cantidad_pacientes = 0;
 	if (strcmp(parametros[2], PRIORIDAD1) == 0) {
@@ -59,6 +82,9 @@ void procesar_comando(const char* comando, char** parametros, abb_t* doctores, h
 		if (!verificar_turno(parametros, pacientes, especialidades_regulares)) return;
 		pedir_turno(parametros, pacientes, especialidades_regulares, especialidades_urgentes);
 	} else if (strcmp(comando, COMANDO_ATENDER) == 0) {
+		/*if (!verificar_atender(parametros, doctores, especialidades_regulares, especialidades_urgentes)) return;
+		atender(parametros, doctores, especialidades_regulares, especialidades_urgentes);
+		*/
 
 	} else if (strcmp(comando, COMANDO_INFORME) == 0) {
 
