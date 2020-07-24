@@ -6,6 +6,7 @@
 #include "heap.h"
 #include "lista.h"
 #include "cola.h"
+
 #define SEPARADOR ','
 #define POS_CAMPO_PACIENTE 0
 #define POS_CAMPO_DOCTOR 0 
