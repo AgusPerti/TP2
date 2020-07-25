@@ -144,7 +144,6 @@ bool visitar(const char* clave, void* dato, void* extra) {
 }
 
 void destruir_estructuras(hash_t* pacientes, hash_t* regulares, hash_t* urgentes, abb_t* doctores) {
-	hash_destruir(pacientes);
 
 	hash_iter_t* iter_regulares = hash_iter_crear(regulares);
 	hash_iter_t* iter_urgentes = hash_iter_crear(urgentes);
@@ -170,6 +169,7 @@ void destruir_estructuras(hash_t* pacientes, hash_t* regulares, hash_t* urgentes
 
 	hash_destruir(regulares);
 	hash_destruir(urgentes);
+	hash_destruir(pacientes);
 	abb_destruir(doctores);
 }
 
