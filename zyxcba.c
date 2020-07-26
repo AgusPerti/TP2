@@ -20,6 +20,8 @@
 #define POS_CAMPO_ESPECIALIDAD 1 // posicion del nombre de la especialidad
 #define POS_CAMPO_URGENCIA 2 // posicion de la urgencia
 #define POS_CAMPO_NOMBRE_DOC 0 // posicion del nombre del doctor
+#define POS_CAMPO_INICIO 0 // posicion del nombre del doctor inicial
+#define POS_CAMPO_FIN 1 // posicion del nombre del doctor final
 
 bool verificar_turno(char** parametros, hash_t* pacientes, hash_t* especialidades_regulares) {
 	if (!hash_pertenece(pacientes, parametros[POS_CAMPO_NOMBRE_PAC])) {
@@ -57,6 +59,39 @@ bool verificar_turno(char** parametros, hash_t* pacientes, hash_t* especialidade
 	return true;
 }*/
 
+/*bool verificar_informe(char** parametros, abb_t* doctores) {
+	if (parametros[POS_CAMPO_INICIO] == NULL) return true;
+
+	if (strcmp(parametros[POS_CAMPO_INICIO], "\0") == 0 && parametros[POS_CAMPO_FIN] != NULL) {
+		if (!abb_pertenece(doctores, parametros[POS_CAMPO_FIN])) {
+			printf(ENOENT_DOCTOR, parametros[POS_CAMPO_FIN]);
+			return false;
+		}
+		return true;
+	}
+
+	if (parametros[POS_CAMPO_INICIO] != NULL && strcmp(parametros[POS_CAMPO_FIN], "\0") == 0) {
+		if (!abb_pertenece(doctores, parametros[POS_CAMPO_INICIO])) {
+			printf(ENOENT_DOCTOR, parametros[POS_CAMPO_INICIO]);
+			return false;
+		}
+		return true;
+	}
+
+	if (abb_pertenece(doctores, parametros[POS_CAMPO_INICIO])) {
+		if (!abb_pertenece(doctores, parametros[POS_CAMPO_FIN])) {
+			printf(ENOENT_DOCTOR, parametros[POS_CAMPO_FIN]);
+			return false;
+		}
+		return true;
+	} else {
+		printf(ENOENT_DOCTOR, parametros[POS_CAMPO_INICIO]);
+		return false;
+	}
+
+	return true;
+}*/
+
 /*void atender(char** parametros, abb_t* doctores, hash_t* especialidades_regulares, hash_t* especialidades_urgentes){
 	//Parametros recibe solo el nombre del doctor, hay que fijarse si hay pacientes urgentes, si los hay, se atienden,
 	//de otra manera se tratan a los pacientes regulares ingresando a la cola a traves de la especialidad del doctor.
@@ -84,17 +119,49 @@ bool verificar_turno(char** parametros, hash_t* pacientes, hash_t* especialidade
 void pedir_turno(char** parametros, hash_t* pacientes, hash_t* especialidades_regulares, hash_t* especialidades_urgentes) {
 	size_t cantidad_pacientes = 0;
 	if (strcmp(parametros[POS_CAMPO_URGENCIA], PRIORIDAD1) == 0) {
-		cola_encolar(hash_obtener(especialidades_urgentes, parametros[1]), parametros[POS_CAMPO_NOMBRE_PAC]);
+		cola_encolar(hash_obtener(especialidades_urgentes, parametros[1]), parametros[POS_CAMPO_NOMBRE_PAC]); // O (1)
 	} else {
 		lista_t* datos_paciente = lista_crear();
 		if (!datos_paciente) return;
 		lista_insertar_primero(datos_paciente, hash_obtener(pacientes, parametros[POS_CAMPO_NOMBRE_PAC]));
 		lista_insertar_primero(datos_paciente, parametros[POS_CAMPO_NOMBRE_PAC]);
-		heap_encolar(hash_obtener(especialidades_regulares, parametros[POS_CAMPO_ESPECIALIDAD]), datos_paciente);
+		heap_encolar(hash_obtener(especialidades_regulares, parametros[POS_CAMPO_ESPECIALIDAD]), datos_paciente); // O (log n)
 	}
 	cantidad_pacientes = heap_cantidad(hash_obtener(especialidades_regulares, parametros[POS_CAMPO_ESPECIALIDAD])) + cola_cantidad(hash_obtener(especialidades_urgentes, parametros[POS_CAMPO_ESPECIALIDAD]));
 	printf(PACIENTE_ENCOLADO, parametros[POS_CAMPO_NOMBRE_PAC]);
 	printf(CANT_PACIENTES_ENCOLADOS, cantidad_pacientes, parametros[POS_CAMPO_ESPECIALIDAD]);
+}
+
+bool fabricar_lista(const char* clave, void* dato, void* extra) { 
+	lista_insertar_ultimo(extra, strdup(clave));
+	return true;
+}
+
+bool imprimir_lista_cadenas(void* dato, void* extra, void *estructura) {
+	(*(size_t*)extra)++;
+	char* nombre = dato;
+	lista_t* lista = abb_obtener(estructura, nombre);
+	size_t cant_pacientes = *(size_t*)lista_ver_primero(lista);
+	char* especialidad = lista_ver_ultimo(lista); 
+	printf(INFORME_DOCTOR,*(size_t*)extra, nombre, especialidad, cant_pacientes);
+	return true;
+}
+
+void hacer_informe(char** parametros, abb_t* doctores) {
+	lista_t* claves_doctores = lista_crear();
+	char* inicio = parametros[POS_CAMPO_INICIO];
+	char* fin = parametros[POS_CAMPO_FIN];
+	if (!strcmp(parametros[POS_CAMPO_INICIO], "")) {
+		inicio = NULL;
+	}
+	if (!strcmp(parametros[POS_CAMPO_FIN], "")) {
+		fin = NULL;
+	}
+	abb_por_rangos(doctores, fabricar_lista, claves_doctores, inicio, fin);
+	printf(DOCTORES_SISTEMA, lista_largo(claves_doctores));
+	size_t cant_doctores = 0;
+	lista_iterar(claves_doctores, imprimir_lista_cadenas, &cant_doctores, doctores);
+	lista_destruir(claves_doctores, free);
 }
 
 void procesar_comando(const char* comando, char** parametros, abb_t* doctores, hash_t* pacientes, hash_t* especialidades_regulares, hash_t* especialidades_urgentes) {
@@ -106,9 +173,10 @@ void procesar_comando(const char* comando, char** parametros, abb_t* doctores, h
 		atender(parametros, doctores, especialidades_regulares, especialidades_urgentes);*/
 
 	} else if (strcmp(comando, COMANDO_INFORME) == 0) {
-
+		//if (!verificar_informe(parametros, doctores)) return;
+		hacer_informe(parametros, doctores);
 	} else {
-
+		printf(ENOENT_CMD, comando);
 	}
 }
 
