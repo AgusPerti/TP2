@@ -81,7 +81,7 @@ void lista_destruir(lista_t* lista, void destruir_dato(void*));
 // la lista este mal.
 // Pre: la lista fue creada.
 // Post: iteró sobre la lista y llamó a la función visitar para los elementos de la lista.
-void lista_iterar(lista_t *lista, bool visitar(void *dato, void *extra), void *extra);
+void lista_iterar(lista_t *lista, bool visitar(void *dato, void *extra, void *estructura), void *extra, void *estructura);
 
 /* ******************************************************************
  *                    PRIMITIVA DEL ITERADOR EXTERNO

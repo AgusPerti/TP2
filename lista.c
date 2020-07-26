@@ -124,10 +124,10 @@ void lista_destruir(lista_t* lista, void destruir_dato(void*)) {
  *                    PRIMITIVA DEL ITERADOR INTERNO
  * *****************************************************************/
 
-void lista_iterar(lista_t *lista, bool visitar(void *dato, void *extra), void *extra) {
+void lista_iterar(lista_t *lista, bool visitar(void *dato, void *extra, void *estructura), void *extra, void *estructura) {
     nodo_t* actual = lista->prim;
     while (actual) {
-        if (!visitar(actual->dato, extra)) {
+        if (!visitar(actual->dato, extra, estructura)) {
             break;
         }
         actual = actual->sig;
