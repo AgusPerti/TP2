@@ -67,8 +67,10 @@ bool csv_crear_estructuras(char** campos, abb_t* arbol, hash_t* regulares, hash_
 	lista_t* lista = lista_crear();
 	if (!lista) return false;
 
-	lista_insertar_primero(lista, strdup(campos[POS_CAMPO_ESPECIALIDAD]));
-	//lista_insertar_ultimo();
+	lista_insertar_ultimo(lista, strdup(campos[POS_CAMPO_ESPECIALIDAD]));
+	size_t* cant_pac = malloc(sizeof(size_t));
+	*cant_pac = 0;
+	lista_insertar_primero(lista, cant_pac);
 	abb_guardar(arbol, campos[POS_CAMPO_DOCTOR], lista); 
 
 	heap_t* heap = heap_crear(comparacion);
