@@ -250,9 +250,44 @@ bool recorrido_in_order(nodo_abb_t *actual, bool visitar(const char *, void *, v
     return true;
 }
 
+bool recorrido_por_rangos(nodo_abb_t *actual, bool visitar(const char *, void *, void *), void *extra, const char *inicio, const char *fin, abb_t* arbol) {
+    if (actual == NULL) {
+        return true;
+    }
+    if (inicio != NULL) {
+        if (arbol->comparar(actual->clave, inicio) < 0) {
+            recorrido_por_rangos(actual->der, visitar, extra, inicio, fin, arbol);
+            return true;
+        } 
+    }
+    if (fin != NULL) {
+        if (arbol->comparar(actual->clave, fin) > 0) {
+            recorrido_por_rangos(actual->izq, visitar, extra, inicio, fin, arbol);   
+            return true;
+        }
+    } 
+    /*Recorrido in order*/
+    if (!recorrido_por_rangos(actual->izq, visitar, extra, inicio, fin, arbol)) {
+        return false;
+    }
+    if (!visitar(actual->clave, actual->dato, extra)) {
+        return false;
+    }
+    if (!recorrido_por_rangos(actual->der, visitar, extra, inicio, fin, arbol)) {
+        return false;
+    }
+
+    return true;
+}
+
 void abb_in_order(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra) {
     nodo_abb_t* actual = arbol->raiz;
     recorrido_in_order(actual, visitar, extra);
+}
+
+void abb_por_rangos(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra, const char *inicio, const char *fin) {
+    nodo_abb_t* actual = arbol->raiz;
+    recorrido_por_rangos(actual, visitar, extra, inicio, fin, arbol);
 }
 
 /* *****************************************************************

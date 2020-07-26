@@ -67,6 +67,9 @@ Pre: Se creo el abb.
 Post: Se itero ejecutando visitar hasta el elemento indicado */
 void abb_in_order(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra);
 
+
+void abb_por_rangos(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra, const char *inicio, const char *fin);
+
 /*******************************************************************************
 *
 *                               ITERADOR EXTERNO
