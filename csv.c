@@ -6,6 +6,8 @@
 #include "heap.h"
 #include "lista.h"
 #include "cola.h"
+#include "mensajes.h"
+#include <ctype.h>
 
 #define SEPARADOR ','
 #define POS_CAMPO_PACIENTE 0
@@ -17,14 +19,24 @@ int comparacion(const void* elem1, const void* elem2) {
 	int num1 = atoi((char*)lista_ver_ultimo(elem1));
 	int num2 = atoi((char*)lista_ver_ultimo(elem2));
     if (num1 < num2) {
-        return -1;
+        return 1;
     }
 
     if (num1 > num2) {
-        return 1;
+        return -1;
     }
 	
     return 0;
+}
+
+bool es_numero_y_entero(char* str) {
+    for (size_t i = 0; str[i] != '\0'; i++) {
+        if (isdigit(str[i]) == 0) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 static void eliminar_fin_linea(char* linea) {
@@ -54,7 +66,11 @@ bool csv_leer_archivo(const char* ruta_csv, tipo_archivo_t tipo_archivo, hash_t*
 				abb_destruir(doctores);
 			}
 		} else {
-			hash_guardar(pacientes, campos[POS_CAMPO_PACIENTE], strdup(campos[POS_CAMPO_ANIO]));
+			if (!es_numero_y_entero(campos[POS_CAMPO_ANIO])) {
+				printf(ENOENT_ANIO, campos[POS_CAMPO_ANIO]);
+			} else {
+				hash_guardar(pacientes, campos[POS_CAMPO_PACIENTE], strdup(campos[POS_CAMPO_ANIO]));
+			}
 		}
 		free_strv(campos);
 	}
@@ -75,20 +91,23 @@ bool csv_crear_estructuras(char** campos, abb_t* arbol, hash_t* regulares, hash_
 
 	heap_t* heap = heap_crear(comparacion);
 	if (!heap) return false;
-	hash_guardar(regulares, campos[POS_CAMPO_ESPECIALIDAD], heap); 
+	if (hash_pertenece(regulares, campos[POS_CAMPO_ESPECIALIDAD])) {
+		heap_destruir(heap, NULL);
+	} else {
+		hash_guardar(regulares, campos[POS_CAMPO_ESPECIALIDAD], heap); 
+	}
 	
 	cola_t* cola = cola_crear();
 	if (!cola) {
 		heap_destruir(heap, NULL);
 		return false;
 	}
+	if (hash_pertenece(urgentes, campos[POS_CAMPO_ESPECIALIDAD])) {
+		cola_destruir(cola, NULL);
+		return true;
+	} 
 	hash_guardar(urgentes, campos[POS_CAMPO_ESPECIALIDAD], cola);
 
 	return true;
 }
 
-/*bool csv_crear_estructuras_hash(char** campos, hash_t* pacientes) {
-	hash_guardar(pacientes, campos[0], campos[1]);
-
-	return true;
-}*/
