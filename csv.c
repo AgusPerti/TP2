@@ -48,8 +48,11 @@ static void eliminar_fin_linea(char* linea) {
 
 bool csv_leer_archivo(const char* ruta_csv, tipo_archivo_t tipo_archivo, hash_t* pacientes, hash_t* regulares, hash_t* urgentes, abb_t* doctores) {
 	FILE* archivo = fopen(ruta_csv, "r");
-	if (!archivo) return false;
-
+	if (!archivo) {
+		printf(ENOENT_ARCHIVO, ruta_csv);
+		return false;
+	} 
+		
 	char* linea = NULL;
 	size_t c = 0;
 
