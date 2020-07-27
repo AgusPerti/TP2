@@ -22,4 +22,17 @@
 
 #define ENOENT_PARAMS "ERROR: cantidad de parametros invalidos para comando '%s'\n"
 
+#define COMANDO_PEDIR_TURNO "PEDIR_TURNO"
+#define COMANDO_ATENDER "ATENDER_SIGUIENTE"
+#define COMANDO_INFORME "INFORME"
+#define PRIORIDAD1 "URGENTE"
+#define PRIORIDAD2 "REGULAR"
+
+#define POS_CAMPO_NOMBRE_PAC 0 // posicion del nombre del paciente
+#define POS_CAMPO_ESPECIALIDAD 1 // posicion del nombre de la especialidad
+#define POS_CAMPO_URGENCIA 2 // posicion de la urgencia
+#define POS_CAMPO_NOMBRE_DOC 0 // posicion del nombre del doctor
+#define POS_CAMPO_INICIO 0 // posicion del nombre del doctor inicial
+#define POS_CAMPO_FIN 1 // posicion del nombre del doctor final
+
 #endif
