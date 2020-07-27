@@ -91,30 +91,42 @@ bool verificar_turno(char** parametros, hash_t* pacientes, hash_t* especialidade
 
 	return true;
 }*/
-
-/*void atender(char** parametros, abb_t* doctores, hash_t* especialidades_regulares, hash_t* especialidades_urgentes){
-	//Parametros recibe solo el nombre del doctor, hay que fijarse si hay pacientes urgentes, si los hay, se atienden,
-	//de otra manera se tratan a los pacientes regulares ingresando a la cola a traves de la especialidad del doctor.
+void actualizar_historial_doc(lista_t* doc_datos){
+	size_t* cant_pacien_atendidos = lista_ver_primero(doc_datos);
+	size_t* cant_nueva = malloc(sizeof(size_t));
+	*cant_nueva = *cant_pacien_atendidos + 1;
 	
-	lista_t* doc_esp = abb_obtener(doctores, parametros[0]);
+	lista_borrar_primero(doc_datos);
+	lista_insertar_primero(doc_datos, cant_nueva);
+}
+
+void atender(char** parametros, abb_t* doctores, hash_t* especialidades_regulares, hash_t* especialidades_urgentes){
+	
+	lista_t* doc_datos = abb_obtener(doctores, parametros[0]);
+	char* doc_esp = lista_ver_ultimo(doc_datos);
+	
 	lista_t* datos_pacientes;
-	size_t cant_urgentes = cola_cantidad(hash_obtener(especialidades_urgentes, doc_esp[0]));
+	size_t cant_urgentes = cola_cantidad(hash_obtener(especialidades_urgentes, doc_esp));
 	size_t cant_regulares;
 	char* nom_paciente;
-	 
+	
 	if(cant_urgentes > 0){
-		nom_paciente = cola_desencolar(hash_obtener(especialidades_urgentes, doc_esp[0]));
+		nom_paciente = cola_desencolar(hash_obtener(especialidades_urgentes, doc_esp));
 	 	printf(PACIENTE_ATENDIDO,nom_paciente);
 	}
 	else {
-	 	datos_pacientes = heap_desencolar(hash_obtener(especialidades_regulares, doc_esp[0]));
-	 	nom_paciente = datos_paciente[0];
+	 	datos_pacientes = heap_desencolar(hash_obtener(especialidades_regulares, doc_esp));
+	 	nom_paciente = lista_ver_primero(datos_pacientes);
 	 	printf(PACIENTE_ATENDIDO, nom_paciente);
-		//Falta un free
-		cant_regulares = heap_cantidad(hash_obtener(especialidades_regulares, doc_esp[0]));
+	 	
+	 	lista_destruir(datos_pacientes,NULL);
+		cant_regulares = heap_cantidad(hash_obtener(especialidades_regulares, doc_esp));
 	}
-	printf(CANT_PACIENTES_ENCOLADOS,cant_regulares + cant_urgentes);
-}*/
+	
+	actualizar_historial_doc(doc_datos);
+	
+	printf(CANT_PACIENTES_ENCOLADOS, cant_regulares + cant_urgentes, doc_esp);
+}
 
 void pedir_turno(char** parametros, hash_t* pacientes, hash_t* especialidades_regulares, hash_t* especialidades_urgentes) {
 	size_t cantidad_pacientes = 0;
