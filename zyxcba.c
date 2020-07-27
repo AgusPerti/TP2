@@ -42,14 +42,14 @@ bool verificar_turno(char** parametros, hash_t* pacientes, hash_t* especialidade
 	return true;
 }
 
-/*bool verificar_atender(char** parametros, abb_t* doctores, hash_t* especialidades_regulares, hash_t* especialidades_urgentes){
+bool verificar_atender(char** parametros, abb_t* doctores, hash_t* especialidades_regulares, hash_t* especialidades_urgentes){
 	if(!abb_pertenece(doctores, parametros[POS_CAMPO_NOMBRE_DOC])){
 		printf(ENOENT_DOCTOR, parametros[POS_CAMPO_NOMBRE_DOC]);
 		return false;
 	}
-	lista_t* doc_esp = abb_obtener(doctores, parametros[0]);//ojo aca, no se si se recibe una lista, trato de acceder con doc_esp[0] al nombre de la especialidad.
+	lista_t* doc_datos = abb_obtener(doctores, parametros[0]);
 	
-	size_t cantidad_pacientes = heap_cantidad(hash_obtener(especialidades_regulares, lista_ver_primero(doc_esp))) + cola_cantidad(hash_obtener(especialidades_urgentes, doc_esp[0]));
+	size_t cantidad_pacientes = heap_cantidad(hash_obtener(especialidades_regulares, lista_ver_ultimo(doc_datos))) + cola_cantidad(hash_obtener(especialidades_urgentes, lista_ver_ultimo(doc_datos)));
 	
 	
 	if(cantidad_pacientes == 0){
@@ -57,7 +57,7 @@ bool verificar_turno(char** parametros, hash_t* pacientes, hash_t* especialidade
 		return false;
 	}
 	return true;
-}*/
+}
 
 /*bool verificar_informe(char** parametros, abb_t* doctores) {
 	if (parametros[POS_CAMPO_INICIO] == NULL) return true;
